@@ -1,0 +1,75 @@
+.login-page {
+  background: linear-gradient(to right, #d10056, #fbdee1);
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Exo 2', sans-serif;
+  overflow: hidden;
+}
+
+.splash {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #d10056;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeOut 2s ease forwards;
+  animation-delay: 2s;
+  z-index: 999;
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; visibility: hidden; }
+}
+
+.login-container {
+  text-align: center;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 1s ease forwards;
+  animation-delay: 2.2s;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+input, button {
+  padding: 12px;
+  margin: 10px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: none;
+  width: 250px;
+}
+
+input {
+  background: white;
+  color: #004aad;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+button {
+  background: #7F00FF;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background: #003080;
+}
+
+.error {
+  color: #ffdddd;
+  font-size: 14px;
+  margin-top: 5px;
+  min-height: 20px;
+}

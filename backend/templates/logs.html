@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Historique de présence</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: 'Exo 2', sans-serif;
+      margin: 0;
+      background: url("static/background.jpg") no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+      overflow-x: hidden;
+    }
+
+    .fade-in-up {
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 1s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 10px 20px;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .back-btn, .logout-btn, .print-btn {
+      background: #d10056;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 5px;
+    }
+
+    .back-btn:hover, .logout-btn:hover, .print-btn:hover {
+      background: #7F00FF;
+    }
+
+    .content1 img {
+      max-width: 180px;
+    }
+
+    h2 {
+      color: #d10056;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .main-content {
+      padding: 20px;
+      animation-delay: 0.5s;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+
+    #timezoneSelector {
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    label[for="timezoneSelector"] {
+      font-weight: bold;
+      color: #d10056;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+
+    th {
+      background: #434f58;
+      color: white;
+    }
+
+    #statsContainer {
+      margin-top: 30px;
+      text-align: center;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <script>
+    if (!sessionStorage.getItem("admin_password")) {
+      window.location.href = "login.html";
+    }
+  </script>
+
+  <div class="top-bar">
+    <button class="back-btn" onclick="window.location.href='index.html'">← Retour</button>
+    <div class="content1">
+      <a href="index.html"><img src="static/Baobab.png" alt="Baobab Banque"/></a>
+    </div>
+    <button onclick="logout()" class="logout-btn">🔓 Déconnexion</button>
+  </div>
+
+  <div class="main-content fade-in-up">
+    <h2 id="title">📋 Historique de présence</h2>
+
+    <div style="text-align: center;">
+      <button onclick="downloadAsPDF()" class="print-btn">📄 Télécharger PDF</button>
+    </div>
+
+    <div style="text-align: center;">
+      <label for="timezoneSelector" class="fuseauH">Fuseau horaire :</label>
+      <select id="timezoneSelector"></select>
+    </div>
+
+    <div class="table-container">
+      <table id="logTable">
+        <thead>
+          <tr>
+            <th>Matricule</th>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Emploi</th>
+            <th>Entrée</th>
+            <th>Sortie</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div id="statsContainer">
+      <h3>📊 Statistiques de présence</h3>
+      <p id="presenceCount"></p>
+      <p id="totalHS"></p>
+      <p id="totalAmount"></p>
+    </div>
+  </div>
+<script>
+  const API_BASE  = "https://baobab-attendance-1ad63c0e2cbb.herokuapp.com";
+  const params    = new URLSearchParams(window.location.search);
+  const studentId = params.get("id");
+  let logsData    = [];
+
+  if (!studentId) window.location.href = "login.html";
+
+  function logout() {
+    sessionStorage.removeItem("admin_password");
+    window.location.href = "login.html";
+  }
+
+  function populateTimezoneSelector() {
+    const tzSelect = document.getElementById("timezoneSelector");
+    for (let offset = -12; offset <= 12; offset++) {
+      const label = offset >= 0 ? `GMT+${offset}` : `GMT${offset}`;
+      const value = offset === 0
+        ? "Etc/GMT-3"
+        : offset > 0
+          ? `Etc/GMT-${offset}`
+          : `Etc/GMT+${-offset}`;
+      const opt = document.createElement("option");
+      opt.value = value;
+      opt.textContent = label;
+      if (offset === 3) opt.selected = true;
+      tzSelect.appendChild(opt);
+    }
+  }
+
+  function getSelectedTimezone() {
+    return document.getElementById("timezoneSelector").value || "Etc/GMT-3";
+  }
+
+  function formatToLocalTime(utcString) {
+    if (!utcString) return "";
+    try {
+      const iso = utcString.replace(" ", "T") + "Z";
+      const dt  = new Date(iso);
+      return dt.toLocaleString("fr-FR", {
+        timeZone: getSelectedTimezone(),
+        hour12: false,
+        timeZoneName: "short"
+      });
+    } catch {
+      return utcString;
+    }
+  }
+
+  async function loadLogs() {
+    try {
+      const res   = await fetch(`${API_BASE}/api/logs/${studentId}`);
+      const json  = await res.json();
+      logsData    = json.data || [];
+      const tbody = document.querySelector("#logTable tbody");
+      tbody.innerHTML = "";
+
+      const titleElem = document.getElementById("title");
+      if (logsData.length) {
+        titleElem.textContent = `📋 Historique de présence – ${logsData[0].Nom} ${logsData[0].Prenom}`;
+      } else {
+        titleElem.textContent = `📋 Historique de présence – ID ${studentId}`;
+        tbody.innerHTML = "<tr><td colspan='6'>Aucun log trouvé</td></tr>";
+        return;
+      }
+
+      let totalMinutes = 0;
+      let totalAmount = 0;
+
+      logsData.forEach(log => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${log.Matricule}</td>
+          <td>${log.Nom}</td>
+          <td>${log.Prenom}</td>
+          <td>${log.Emploi}</td>
+          <td>${formatToLocalTime(log.entry_time)}</td>
+          <td>${formatToLocalTime(log.exit_time)}</td>
+        `;
+        tbody.appendChild(tr);
+
+        if (log.overtime) {
+          const [h, m] = log.overtime.replace("H", ":").split(":").map(v => parseInt(v) || 0);
+          totalMinutes += h * 60 + m;
+        }
+        totalAmount += log.overtime_amount || 0;
+      });
+
+      const hTot = Math.floor(totalMinutes / 60);
+      const mTot = totalMinutes % 60;
+      const totalHS = `${hTot}H${mTot.toString().padStart(2, "0")}`;
+      const totalAmountStr = `${totalAmount.toLocaleString("fr-FR")} Ar`;
+
+      document.getElementById("presenceCount").textContent = `Présences enregistrées : ${logsData.length}`;
+      document.getElementById("totalHS").textContent = `Total HS cumulées : ${totalHS}`;
+      document.getElementById("totalAmount").textContent = `Montant total HS : ${totalAmountStr}`;
+    } catch (err) {
+      console.error("Erreur logs :", err);
+      alert("Erreur chargement logs : " + err);
+    }
+  }
+
+  async function downloadAsPDF() {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const tableElem = document.querySelector(".table-container");
+    const statsElem = document.getElementById("statsContainer");
+
+    const canvasTable = await html2canvas(tableElem, { scale: 2 });
+    const canvasStats = await html2canvas(statsElem, { scale: 2 });
+
+    const imgTable = canvasTable.toDataURL("image/jpeg", 1.0);
+    const imgStats = canvasStats.toDataURL("image/jpeg", 1.0);
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const tableHeight = (canvasTable.height * pageWidth) / canvasTable.width;
+    const statsHeight = (canvasStats.height * pageWidth) / canvasStats.width;
+
+    pdf.addImage(imgTable, "JPEG", 0, 10, pageWidth, tableHeight);
+    pdf.addPage();
+    pdf.addImage(imgStats, "JPEG", 0, 10, pageWidth, statsHeight);
+
+    pdf.save(`logs_${studentId}.pdf`);
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    populateTimezoneSelector();
+    loadLogs();
+    document.getElementById("timezoneSelector").addEventListener("change", loadLogs);
+  });
+</script>
+</body>
+</html>

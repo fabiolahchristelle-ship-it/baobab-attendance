@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Liste des Employés</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Exo 2', sans-serif;
+      margin: 0;
+      background: url("static/background.jpg") no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+      overflow-x: hidden;
+    }
+
+    .fade-in-up {
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 1s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 10px 20px;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .back-btn, .logout-btn {
+      background: #d10056;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 5px;
+    }
+
+    .back-btn:hover, .logout-btn:hover {
+      background: #7F00FF;
+    }
+
+    .content1 img {
+      max-width: 180px;
+    }
+
+    h1 {
+      color: #d10056;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .main-content {
+      padding: 20px;
+      animation-delay: 0.5s;
+    }
+
+    input, select, button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 30px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      font-family: 'Exo 2', sans-serif;
+      margin: 5px;
+      width: 250px;
+    }
+
+    button {
+      background-color: #d10056;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #7F00FF;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    th {
+      background: #434f58;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    if (!sessionStorage.getItem("admin_password")) {
+      window.location.href = "login.html";
+    }
+  </script>
+
+  <div class="top-bar">
+    <button class="back-btn" onclick="window.location.href='index.html'">← Retour</button>
+    <div class="content1">
+      <a href="index.html"><img src="static/Baobab.png" alt="Baobab Banque"/></a>
+    </div>
+    <button onclick="logout()" class="logout-btn">🔓 Déconnexion</button>
+  </div>
+
+  <div class="main-content fade-in-up">
+    <h1>📋 Liste des Employés</h1>
+
+    <div style="text-align: center;">
+      <input type="text" id="searchInput" placeholder="🔍 Rechercher par nom ou Matricule" />
+      <select id="classFilter">
+        <option value="">Toutes les postes</option>
+      </select>
+      <button onclick="loadStudents()">🔄 Rafraîchir</button>
+    </div>
+
+    <div class="table-container">
+      <table id="studentsTable">
+        <thead>
+          <tr>
+            <th>Matricule</th>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Emploi</th>
+            <th>Affectation</th>
+            <th>Numéro Téléphone</th>
+            <th>Mail</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "https://baobab-attendance-1ad63c0e2cbb.herokuapp.com";
+    const API_URL = `${API_BASE}/api/students/full`;
+    let studentsData = [];
+
+    function logout() {
+      sessionStorage.removeItem("admin_password");
+      window.location.href = "login.html";
+    }
+
+    const INACTIVITY_LIMIT = 30 * 60 * 1000;
+    let lastActivity = Date.now();
+
+    function checkInactivity() {
+      if (Date.now() - lastActivity > INACTIVITY_LIMIT) {
+        alert("Session expirée. Veuillez vous reconnecter.");
+        logout();
+      }
+    }
+
+    ["click", "mousemove", "keydown", "touchstart"].forEach(evt => {
+      document.addEventListener(evt, () => {
+        lastActivity = Date.now();
+      });
+    });
+
+    setInterval(checkInactivity, 60000);
+
+    async function loadStudents() {
+      try {
+        const res = await fetch(API_URL);
+        const json = await res.json();
+        studentsData = json.data || [];
+        renderTable(studentsData);
+        populateClassFilter(studentsData);
+      } catch (err) {
+        alert("Erreur de chargement : " + err);
+      }
+    }
+
+    function renderTable(data) {
+      const tbody = document.querySelector("#studentsTable tbody");
+      tbody.innerHTML = "";
+      if (data.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='7'>Aucun employé trouvé</td></tr>";
+        return;
+      }
+      data.forEach(stu => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${stu.Matricule}</td>
+          <td>${stu.Nom}</td>
+          <td>${stu.Prenom}</td>
+          <td>${stu.Emploi}</td>
+          <td>${stu.Affectation}</td>
+          <td>${stu.Numero}</td>
+          <td>${stu.Mail}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function populateClassFilter(data) {
+      const select = document.getElementById("classFilter");
+      select.innerHTML = '<option value="">Toutes les postes</option>';
+      const classes = [...new Set(data.map(s => s.Emploi))].sort();
+      classes.forEach(cl => {
+        const opt = document.createElement("option");
+        opt.value = cl;
+        opt.textContent = cl;
+        select.appendChild(opt);
+      });
+    }
+
+    function applyFilters() {
+      const searchTerm = document.getElementById("searchInput").value.trim().toLowerCase();
+      const classTerm = document.getElementById("classFilter").value;
+      const filtered = studentsData.filter(stu => {
+        const matchesSearch =
+          stu.Matricule.toString().includes(searchTerm) ||
+          stu.Nom.toLowerCase().includes(searchTerm) ||
+          stu.Prenom.toLowerCase().includes(searchTerm);
+        const matchesClass = classTerm === "" || stu.Emploi === classTerm;
+        return matchesSearch && matchesClass;
+      });
+      renderTable(filtered);
+    }
+
+    document.getElementById("searchInput").addEventListener("input", applyFilters);
+    document.getElementById("classFilter").addEventListener("change", applyFilters);
+
+    window.addEventListener("DOMContentLoaded", loadStudents);
+  </script>
+</body>
+</html>

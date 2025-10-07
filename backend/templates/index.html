@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <title>PRESENCE SCANNER</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Exo 2', sans-serif;
+      background: url("static/background.jpg") no-repeat center center fixed;
+      background-size: cover;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .fade-in-up {
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 1s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0;
+      background-color: #d10056;
+      overflow-x: hidden;
+      transition: width 0.3s ease;
+      padding-top: 60px;
+      box-sizing: border-box;
+      z-index: 1000;
+    }
+
+    .sidebar .closebtn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 30px;
+      color: white;
+      text-decoration: none;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 12px 20px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 18px;
+      transition: background 0.2s;
+    }
+
+    .sidebar a:hover {
+      background-color: #b8004a;
+    }
+
+    #main {
+      margin-left: 0;
+      transition: margin-left 0.3s ease;
+    }
+
+    .openbtn {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      font-size: 20px;
+      cursor: pointer;
+      background-color: #d10056;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      z-index: 1000;
+    }
+
+    .openbtn:hover {
+      background-color: #b8004a;
+    }
+
+    .content1 {
+      margin-left: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    header {
+      background: #d10056;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    main.content {
+      padding: 20px;
+    }
+
+    .action-btn {
+      background: #d10056;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      margin: 5px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .action-btn:hover {
+      background: #7F00FF;
+    }
+
+    .logout-btn {
+      background: #7F00FF;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    .logout-btn:hover {
+      background: #d10056;
+    }
+
+    #searchInput,
+    #classFilter,
+    #timezoneSelector {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 30px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin: 5px;
+      width: 250px;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+
+    th {
+      background: #434f58;
+      color: white;
+    }
+
+    #qr-reader {
+      width: 300px;
+      margin: 20px auto;
+      display: none;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+
+    .pulse-time {
+      font-size: 32px;
+      font-weight: bold;
+      color: #d10056;
+      animation: pulse 1s infinite;
+    }
+
+    .date-style {
+      font-size: 18px;
+      color: #444;
+      margin-top: 5px;
+    }
+
+    .tz-style {
+      font-size: 14px;
+      color: #888;
+      margin-top: 3px;
+    }
+
+    @keyframes pulse {
+      0%   { transform: scale(1);   color: #d10056; }
+      50%  { transform: scale(1.05); color: #7F00FF; }
+      100% { transform: scale(1);   color: #d10056; }
+    }
+  </style>
+</head>
+<body>
+  <script>
+    if (!sessionStorage.getItem("admin_password")) {
+      window.location.href = "login.html";
+    }
+  </script>
+
+  <div id="mySidebar" class="sidebar">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+    <a href="index.html">Accueil</a>
+    <a href="ListEtudiant.html">Liste des employés</a>
+  </div>
+
+  <div id="main" class="fade-in-up">
+    <button class="openbtn" onclick="openNav()">☰ Menu</button>
+    <div class="content1">
+      <a href="index.html">
+        <img src="static/Baobab.png" width="200px" alt="Baobab Banque"/>
+      </a>
+    </div>
+    <header>📷 Application de Présence QR</header>
+    <main class="content">
+      <div style="text-align: center;">
+        <button class="action-btn" onclick="startScanner()">📷 Scanner QR</button>
+        <button class="action-btn" onclick="loadStudents()">🔄 Rafraîchir</button>
+        <button class="action-btn" onclick="resetPresence()">♻️ Réinitialiser</button>
+        <button class="action-btn" onclick="resetEntryExit()">🧹 Réinit Entrée/Sortie</button>
+        <button onclick="logout()" class="logout-btn">🔓 Déconnexion</button>
+      </div>
+      <div style="text-align: center; margin: 15px 0;">
+        <input type="text" id="searchInput" placeholder="🔍 Rechercher…"/>
+        <select id="classFilter"></select>
+        <select id="timezoneSelector"></select>
+      </div>
+      <div id="qr-reader"></div>
+      <div id="clockContainer" style="text-align:center; margin-top:20px;">
+        <div id="localTime" class="pulse-time"></div>
+        <div id="localDate" class="date-style"></div>
+        <div id="timezoneDisplay" class="tz-style"></div>
+      </div>
+      <div class="table-container">
+        <table id="studentsTable">
+          <thead>
+            <tr>
+              <th>MATRICULE</th>
+              <th>NOM</th>
+              <th>PRENOM(S)</th>
+              <th>EMPLOI</th>
+              <th>Présence</th>
+              <th>Entrée</th>
+              <th>Sortie</th>
+              <th>HS (h:m)</th>
+              <th>Montant HS</th>
+              <th>Total HS</th>
+              <th>Total Montant</th>
+              <th>Logs</th>
+              <th>Fuseau</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/html5-qrcode@2.3.7/html5-qrcode.min.js"></script>
+<script>
+  const API_BASE = "https://baobab-attendance-1ad63c0e2cbb.herokuapp.com";
+  const API_URL = `${API_BASE}/api/students`;
+  const RESET_URL = `${API_BASE}/api/reset_presence`;
+  const RESET_ENTRY_EXIT_URL = `${API_BASE}/api/reset_entry_exit`;
+  const MARK_URL = `${API_BASE}/api/mark_presence`;
+
+  let studentsData = [];
+  let lastScan = "";
+  let scanTimeout;
+
+  function openNav() {
+    document.getElementById("mySidebar").style.width = "200px";
+    document.getElementById("main").style.marginLeft = "200px";
+  }
+
+  function closeNav() {
+    document.getElementById("mySidebar").style.width = "0";
+    document.getElementById("main").style.marginLeft = "0";
+  }
+
+  function logout() {
+    sessionStorage.removeItem("admin_password");
+    window.location.href = "login.html";
+  }
+
+  function populateTimezoneSelector() {
+    const tzSelect = document.getElementById("timezoneSelector");
+    for (let offset = -12; offset <= 12; offset++) {
+      const label = offset >= 0 ? `GMT+${offset}` : `GMT${offset}`;
+      const value = offset === 0
+        ? "Etc/GMT-3"
+        : offset > 0
+          ? `Etc/GMT-${offset}`
+          : `Etc/GMT+${-offset}`;
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      if (offset === 3) option.selected = true;
+      tzSelect.appendChild(option);
+    }
+  }
+
+  function getSelectedTimezone() {
+    return document.getElementById("timezoneSelector").value || "Etc/GMT-3";
+  }
+
+  function formatToLocalTime(utcString) {
+    if (!utcString) return "";
+    try {
+      const utcDate = new Date(utcString + "Z");
+      return utcDate.toLocaleString("fr-FR", {
+        timeZone: getSelectedTimezone(),
+        hour12: false,
+        timeZoneName: "short"
+      });
+    } catch (e) {
+      console.warn("Erreur fuseau horaire :", e);
+      return utcString;
+    }
+  }
+
+  function renderTable(arr) {
+    const tbody = document.querySelector("#studentsTable tbody");
+    tbody.innerHTML = "";
+    if (!arr.length) {
+      tbody.innerHTML = "<tr><td colspan='13'>Aucun employé trouvé</td></tr>";
+      return;
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    const tz = getSelectedTimezone();
+    const tzLabel = document.getElementById("timezoneSelector").selectedOptions[0].textContent;
+
+    arr.forEach((stu) => {
+      const entryDate = stu.entry_time ? stu.entry_time.slice(0, 10) : "";
+      const presence = entryDate === today ? "Présent" : "Absent";
+
+      let dailyHS = "Sans Heure Sup";
+      let dailyAmount = "Sans Heure Sup";
+
+      if (stu.entry_time && stu.exit_time) {
+        const exitUtc = new Date(stu.exit_time + "Z");
+        const localExitStr = exitUtc.toLocaleString("en-US", { timeZone: tz });
+        const localExit = new Date(localExitStr);
+
+        const seuil = new Date(localExit);
+        seuil.setHours(16, 0, 0, 0);
+
+        if (localExit > seuil) {
+          const diffMin = Math.floor((localExit - seuil) / 1000 / 60);
+          const h = Math.floor(diffMin / 60);
+          const m = diffMin % 60;
+          dailyHS = `${h}H${m.toString().padStart(2, "0")}`;
+          const amount = Math.floor((diffMin / 60) * 10000);
+          dailyAmount = `${amount.toLocaleString("fr-FR")} Ar`;
+        }
+      }
+
+      const overtimeStr = stu.overtime || "0H00";
+      const [hBase, mBase] = overtimeStr.replace("H", ":").split(":").map(v => parseInt(v) || 0);
+      const totalHS = `${hBase}H${mBase.toString().padStart(2, "0")}`;
+
+      const baseMontant = stu.overtime_amount || 0;
+      const montantAffiche = baseMontant > 0 ? `${baseMontant.toLocaleString("fr-FR")} Ar` : "0 Ar";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${stu.Matricule}</td>
+        <td>${stu.Nom}</td>
+        <td>${stu.Prenom}</td>
+        <td>${stu.Emploi}</td>
+        <td>${presence}</td>
+        <td>${formatToLocalTime(stu.entry_time)}</td>
+        <td>${formatToLocalTime(stu.exit_time)}</td>
+        <td>${dailyHS}</td>
+        <td>${dailyAmount}</td>
+        <td>${totalHS}</td>
+        <td>${montantAffiche}</td>
+        <td><button class="action-btn" onclick="window.location.href='logs.html?id=${stu.Matricule}'">📄 Voir logs</button></td>
+        <td>🕒 ${tzLabel}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+
+  function populateClassFilter(data) {
+      const sel = document.getElementById("classFilter");
+      sel.innerHTML = '<option value="">Toutes les postes</option>';
+      Array.from(new Set(data.map((s) => s.Emploi)))
+        .sort()
+        .forEach((cl) => {
+          const opt = document.createElement("option");
+          opt.value = cl;
+          opt.textContent = cl;
+          sel.appendChild(opt);
+        });
+    }
+
+
+  function applyFilters() {
+    const term = document.getElementById("searchInput").value.trim().toLowerCase();
+    const cls = document.getElementById("classFilter").value;
+    const filtered = studentsData.filter((s) => {
+      const matchText =
+        s.Matricule.toString().includes(term) ||
+        s.Nom.toLowerCase().includes(term) ||
+        s.Prenom.toLowerCase().includes(term);
+      const matchCls = !cls || s.Emploi === cls;
+      return matchText && matchCls;
+    });
+    renderTable(filtered);
+  }
+
+  async function loadStudents() {
+    try {
+      const tbody = document.querySelector("#studentsTable tbody");
+      tbody.innerHTML = "<tr><td colspan='13'>Chargement…</td></tr>";
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error(res.status);
+      const json = await res.json();
+      studentsData = json.data || [];
+      populateClassFilter(studentsData);
+      renderTable(studentsData);
+    } catch (err) {
+      alert("Erreur : " + err);
+    }
+  }
+
+  async function resetPresence() {
+    const pwd = prompt("🔐 Entrez le mot de passe admin");
+    if (!pwd) return;
+    try {
+      const res = await fetch(RESET_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pwd })
+      });
+      const json = await res.json();
+      if (json.status === "ok") {
+        alert("✅ " + json.message);
+        loadStudents();
+      } else {
+        alert("❌ " + (json.message || "Erreur inconnue"));
+      }
+    } catch (e) {
+      console.error(e);
+      alert("❌ Erreur réseau : " + e.message);
+    }
+  }
+
+  async function resetEntryExit() {
+    if (!confirm("Réinitialiser toutes les entrées et sorties ?")) return;
+    try {
+      const res = await fetch(RESET_ENTRY_EXIT_URL, { method: "POST" });
+      const json = await res.json();
+      if (json.status === "ok") {
+        alert("✅ " + json.message);
+        loadStudents();
+      } else {
+        alert("❌ " + (json.message || "Erreur inconnue"));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erreur réseau : " + err.message);
+    }
+  }
+
+  async function startScanner() {
+    const reader = document.getElementById("qr-reader");
+    reader.innerHTML = "";
+    reader.style.display = "block";
+
+    const qr = new Html5Qrcode("qr-reader");
+    await qr.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+      (decodedText) => {
+        if (decodedText === lastScan) return;
+        lastScan = decodedText;
+        clearTimeout(scanTimeout);
+        scanTimeout = setTimeout(() => {
+          qr.stop().then(() => {
+            reader.style.display = "none";
+            handleScan(decodedText);
+          });
+        }, 2000);
+      },
+      (err) => console.warn("Erreur scan :", err)
+    );
+  }
+
+  async function handleScan(decodedText) {
+    const parts = decodedText.split(";");
+    const p = parts.find((p) => p.trim().toLowerCase().startsWith("matricule:"));
+    if (!p) return alert("❌ QR invalide : Matricule non trouvé");
+
+    const studentId = p.split(":")[1]?.trim();
+    if (!studentId) return alert("❌ Matricule vide ou non détecté");
+
+    const tz = getSelectedTimezone();
+
+    try {
+      const res = await fetch(`${MARK_URL}/${studentId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ timezone: tz })
+      });
+
+      const json = await res.json();
+      if (json.status === "ok") {
+        alert(`✅ 
+Entrée : ${formatToLocalTime(json.entry_time)}
+Sortie  : ${formatToLocalTime(json.exit_time)}`);
+        loadStudents();
+      } else {
+        alert("❌ Erreur API : " + (json.message || "Réponse inconnue"));
+      }
+    } catch (err) {
+      alert("❌ Erreur réseau : " + err.message);
+    }
+  }
+
+  function updateClock() {
+    const now = new Date();
+    const tz = getSelectedTimezone();
+
+    const timeStr = now.toLocaleTimeString("fr-FR", {
+      timeZone: tz,
+      hour12: false
+    });
+
+    const dateStr = now.toLocaleDateString("fr-FR", {
+      timeZone: tz,
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
+
+    document.getElementById("localTime").textContent = timeStr;
+    document.getElementById("localDate").textContent = dateStr;
+    document.getElementById("timezoneDisplay").textContent = `🕒 Fuseau horaire : ${tz}`;
+  }
+
+  setInterval(updateClock, 1000);
+
+  window.addEventListener("DOMContentLoaded", () => {
+    populateTimezoneSelector();
+    loadStudents();
+    updateClock();
+    document.getElementById("searchInput").addEventListener("input", applyFilters);
+    document.getElementById("classFilter").addEventListener("change", applyFilters);
+    document.getElementById("timezoneSelector").addEventListener("change", () => {
+      renderTable(studentsData);
+      updateClock();
+    });
+  });
+</script>
+</body>
+</html>
