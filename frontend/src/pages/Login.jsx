@@ -10,6 +10,9 @@ export default function Login() {
   const navigate = useNavigate()
 
   const validateLogin = async () => {
+    console.log("Tentative de connexion...");
+    console.log("Mot de passe:", password);
+    console.log("API:", `${API_BASE}/api/login`);
     setError('')
     if (!password.trim()) {
       setError('Veuillez entrer le mot de passe.')
