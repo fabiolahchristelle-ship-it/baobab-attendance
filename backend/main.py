@@ -97,7 +97,7 @@ def init_db():
 
 # 📦 Modèle Pydantic
 class Etudiant(BaseModel):
-    Matricule: int
+    Matricule: str
     Nom: str
     Prenom: str
     Emploi: str
