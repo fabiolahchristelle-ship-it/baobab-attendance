@@ -67,7 +67,7 @@ export default function ListEtudiants() {
       <div className="top-bar">
         <button className="back-btn" onClick={() => navigate('/index')}>← Retour</button>
         <div className="content1">
-          <img src="/static/Baobab.png" alt="Baobab Banque" />
+          <img src={`${process.env.PUBLIC_URL}/static/Baobab.png`} alt="Baobab Banque" />
         </div>
         <button className="logout-btn" onClick={logout}>🔓 Déconnexion</button>
       </div>
