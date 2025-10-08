@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Html5Qrcode } from 'html5-qrcode'
 import './Index.css'
 
-const API_BASE = localStorage.getItem('API_BASE') || 'http://localhost:8000'
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
 
 export default function Index() {
   const navigate = useNavigate()
