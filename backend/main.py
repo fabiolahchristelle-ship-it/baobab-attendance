@@ -308,3 +308,8 @@ def get_all_students():
         } for r in rows
     ]}
 
+#listes des routes
+@app.get("/api/routes")
+def list_routes():
+    return [route.path for route in app.router.routes]
+
