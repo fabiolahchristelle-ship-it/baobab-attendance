@@ -4,8 +4,8 @@
   "description": "Application de gestion de présence QR pour Baobab",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "npx vite build",
+    "preview": "npx vite preview"
   },
   "dependencies": {
     "html2canvas": "^1.4.1",
@@ -18,5 +18,9 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.0.3",
     "vite": "^5.4.20"
-  }
+  },
+  "engines": {
+  "node": ">=18.0.0"
+}
+
 }
