@@ -37,6 +37,12 @@ app.add_middleware(
 BASE_DIR = os.path.dirname(__file__)
 DB_FILE = os.path.join(BASE_DIR, "SystemManagement.db")
 
+#test
+@app.get("/api/status")
+def status():
+    return {"status": "ok"}
+
+
 # 🎯 Création et migration des tables au démarrage
 @app.on_event("startup")
 def init_db():
