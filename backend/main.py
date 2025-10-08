@@ -318,3 +318,75 @@ def list_routes():
 def root():
     return {"status": "ok"}
 
+
+
+@app.post("/api/students")
+def add_student(student: Etudiant):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO gestion_employe (Matricule, Nom, Prenom, Emploi, Affectation, Numero, Mail)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (
+            student.Matricule,
+            student.Nom,
+            student.Prenom,
+            student.Emploi,
+            student.Affectation,
+            student.Numero,
+            student.Mail
+        ))
+        conn.commit()
+        return {"status": "ok", "message": "Employé ajouté avec succès"}
+    except sqlite3.IntegrityError:
+        raise HTTPException(status_code=400, detail="Matricule déjà existant")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur SQL : {e}")
+    finally:
+        conn.close()
+
+
+
+@app.put("/api/students/{matricule}")
+def update_student(matricule: int, student: Etudiant):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE gestion_employe
+            SET Nom = ?, Prenom = ?, Emploi = ?, Affectation = ?, Numero = ?, Mail = ?
+            WHERE Matricule = ?
+        """, (
+            student.Nom,
+            student.Prenom,
+            student.Emploi,
+            student.Affectation,
+            student.Numero,
+            student.Mail,
+            matricule
+        ))
+        conn.commit()
+        return {"status": "ok", "message": "Employé mis à jour"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur SQL : {e}")
+    finally:
+        conn.close()
+
+
+
+
+@app.delete("/api/students/{matricule}")
+def delete_student(matricule: int):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM gestion_employe WHERE Matricule = ?", (matricule,))
+        conn.commit()
+        return {"status": "ok", "message": f"Employé {matricule} supprimé"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur SQL : {e}")
+    finally:
+        conn.close()
+
+
