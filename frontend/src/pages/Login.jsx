@@ -22,6 +22,9 @@ export default function Login() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password })
       })
+      if (!res.ok) {
+        throw new Error("Erreur réseau");
+      }
       const json = await res.json()
       if (json.status === 'ok') {
         sessionStorage.setItem('admin_password', 'valide')
