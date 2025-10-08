@@ -25,20 +25,29 @@ export default function Login() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password })
       })
+    
       if (!res.ok) {
-        throw new Error("Erreur réseau");
+        if (res.status === 401) {
+          setError('Mot de passe incorrect.')
+        } else {
+          setError(`Erreur serveur (${res.status})`)
+        }
+        return
       }
+    
       const json = await res.json()
+      console.log("Réponse backend:", json)
+    
       if (json.status === 'ok') {
         sessionStorage.setItem('admin_password', 'valide')
         localStorage.setItem('API_BASE', API_BASE)
         localStorage.setItem('sessionStart', Date.now())
         navigate('/index')
       } else {
-        setError('Mot de passe incorrect.')
+        setError('Réponse inattendue du serveur.')
       }
     } catch (err) {
-      console.error(err)
+      console.error("Erreur réseau:", err)
       setError('Erreur de connexion au serveur.')
     }
   }
