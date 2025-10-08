@@ -11,9 +11,9 @@ services:
     name: baobab-frontend
     env: node
     rootDir: frontend
-    buildCommand: npm install && npx vite build
-    staticPublishPath: dist
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
     autoDeploy: true
     envVars:
-      - key: VITE_API_BASE
+      - key: REACT_APP_API_BASE
         value: https://baobab-backend.onrender.com
