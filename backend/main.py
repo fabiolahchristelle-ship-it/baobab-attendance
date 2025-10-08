@@ -313,3 +313,8 @@ def get_all_students():
 def list_routes():
     return [route.path for route in app.router.routes]
 
+
+@app.get("/")
+def root():
+    return {"status": "ok"}
+
