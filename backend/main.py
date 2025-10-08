@@ -283,3 +283,28 @@ async def wipe_all(request: Request):
         raise HTTPException(status_code=500, detail=f"Erreur SQL : {e}")
     finally:
         conn.close()
+
+@app.get("/api/students")
+def get_all_students():
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT Matricule, Nom, Prenom, Emploi, Affectation, Numero, Mail, Presence
+        FROM gestion_employe
+        ORDER BY Nom ASC
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+    return {"data": [
+        {
+            "Matricule": r[0],
+            "Nom": r[1],
+            "Prenom": r[2],
+            "Emploi": r[3],
+            "Affectation": r[4],
+            "Numero": r[5],
+            "Mail": r[6],
+            "Presence": r[7]
+        } for r in rows
+    ]}
+
