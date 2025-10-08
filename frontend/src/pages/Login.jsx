@@ -17,7 +17,7 @@ export default function Login() {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/validate_password`, {
+      const res = await fetch(`${API_BASE}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password })
