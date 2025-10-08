@@ -1,0 +1,8 @@
+# Ignorer les dossiers de build
+build/
+node_modules/
+
+# Fichiers système
+.DS_Store
+.env
+.env.local
