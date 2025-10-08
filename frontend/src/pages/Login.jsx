@@ -40,10 +40,10 @@ export default function Login() {
   return (
     <div className="login-page">
       <div className="splash">
-        <img src="/static/Baobab_blanc.png" alt="Baobab Banque" />
+        <img src={`${process.env.PUBLIC_URL}/static/background.jpg`} alt="Baobab Banque" />
       </div>
       <div className="login-container">
-        <img src="/static/Baobab_blanc.png" width="300px" alt="Baobab Banque" />
+        <img src={`${process.env.PUBLIC_URL}/static/background.jpg`} alt="Baobab Banque" />
         <h2>🔐 Connexion Admin</h2>
         <input
           type="password"
