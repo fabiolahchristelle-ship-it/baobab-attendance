@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "description": "Application de gestion de présence QR pour Baobab",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
+  "start": "react-scripts start",
+  "build": "react-scripts build",
+  "postinstall": "chmod +x node_modules/.bin/react-scripts"
+},
   "dependencies": {
     "html2canvas": "^1.4.1",
     "html5-qrcode": "^2.3.8",
