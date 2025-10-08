@@ -11,7 +11,7 @@ services:
     name: baobab-frontend
     env: node
     rootDir: frontend
-    buildCommand: npm install && npm run build
+    buildCommand: npm install && npx vite build
     staticPublishPath: dist
     autoDeploy: true
     envVars:
