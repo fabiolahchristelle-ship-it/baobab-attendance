@@ -13,7 +13,13 @@ import os
 admin_password = os.getenv("ADMIN_PASSWORD", "default123")
 
 # 🚀 Initialisation FastAPI
-app = FastAPI()
+app = FastAPI(
+    title="Baobab Attendance API",
+    description="API pour la gestion des présences",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
 
 # 📁 Templates et fichiers statiques
 templates = Jinja2Templates(directory="templates")
