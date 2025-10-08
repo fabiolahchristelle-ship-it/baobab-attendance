@@ -1,10 +1,12 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Login from './pages/Login'
-import Index from './pages/Index'
-import ListEtudiants from './pages/ListEtudiants'
-import Logs from './pages/Logs'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Login from './pages/Login';
+import Index from './pages/Index';
+import ListEtudiants from './pages/ListEtudiants';
+import Logs from './pages/Logs';
 
 export default function App() {
+  console.log("App loaded");
+
   return (
     <BrowserRouter>
       <Routes>
@@ -15,5 +17,5 @@ export default function App() {
         <Route path="/logs" element={<Logs />} />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }

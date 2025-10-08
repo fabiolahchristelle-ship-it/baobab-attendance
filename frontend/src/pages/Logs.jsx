@@ -4,7 +4,7 @@ import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 import './Logs.css'
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
+const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000'
 
 export default function Logs() {
   const navigate = useNavigate()
