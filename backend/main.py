@@ -37,7 +37,6 @@ def init_db():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
-    # Création table gestion_employe
     cursor.execute("""
       CREATE TABLE IF NOT EXISTS gestion_employe (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -50,7 +49,6 @@ def init_db():
         Mail TEXT
       )
     """)
-    # Ajouter colonnes si manquantes
     cols = [c[1] for c in cursor.execute("PRAGMA table_info(gestion_employe)").fetchall()]
     if "Presence" not in cols:
         cursor.execute("ALTER TABLE gestion_employe ADD COLUMN Presence INTEGER DEFAULT 0")
@@ -63,7 +61,6 @@ def init_db():
     if "overtime_amount" not in cols:
         cursor.execute("ALTER TABLE gestion_employe ADD COLUMN overtime_amount INTEGER DEFAULT 0")
 
-    # Création table presence_log
     cursor.execute("""
       CREATE TABLE IF NOT EXISTS presence_log (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,6 +81,18 @@ class Etudiant(BaseModel):
     Affectation: str
     Numero: str
     Mail: str
+
+# 🔐 API : connexion admin
+@app.post("/api/login")
+async def login(request: Request):
+    data = await request.json()
+    password = data.get("password")
+
+    if password == admin_password:
+        return {"status": "ok", "message": "Connexion réussie"}
+    else:
+        raise HTTPException(status_code=401, detail="Mot de passe incorrect")
+
 # ♻️ API : réinitialiser présences et logs
 @app.post("/api/reset_presence")
 async def reset_presence(request: Request):
@@ -110,8 +119,6 @@ async def reset_presence(request: Request):
         raise HTTPException(status_code=500, detail=f"Erreur SQL : {e}")
     finally:
         conn.close()
-
-
 # 📡 API : marquer la présence, gérer entrée/sortie et heures sup.
 @app.post("/api/mark_presence/{student_id}")
 def mark_presence(student_id: str):
@@ -208,26 +215,6 @@ def mark_presence(student_id: str):
         "overtime_amount": new_ot_amt
     }
 
-
-# 🧨 API : suppression totale des données
-@app.post("/api/wipe_all")
-async def wipe_all(request: Request):
-    data = await request.json()
-    if data.get("password") != admin_password:
-        raise HTTPException(status_code=401, detail="Mot de passe admin incorrect")
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    try:
-        for table in ["gestion_employe", "presence_log", "presence_journaliere"]:
-            cursor.execute(f"DELETE FROM {table}")
-        conn.commit()
-        return {"status": "ok", "message": "Toutes les données ont été effacées"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur SQL : {e}")
-    finally:
-        conn.close()
-
-
 # 📄 API : logs d’un employé
 @app.get("/api/logs/{student_id}")
 def get_logs_by_student(student_id: str):
@@ -255,3 +242,21 @@ def get_logs_by_student(student_id: str):
             "overtime_amount": r[7]
         } for r in rows
     ]}
+
+# 🧨 API : suppression totale des données
+@app.post("/api/wipe_all")
+async def wipe_all(request: Request):
+    data = await request.json()
+    if data.get("password") != admin_password:
+        raise HTTPException(status_code=401, detail="Mot de passe admin incorrect")
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    try:
+        for table in ["gestion_employe", "presence_log", "presence_journaliere"]:
+            cursor.execute(f"DELETE FROM {table}")
+        conn.commit()
+        return {"status": "ok", "message": "Toutes les données ont été effacées"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur SQL : {e}")
+    finally:
+        conn.close()
