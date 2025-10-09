@@ -71,6 +71,7 @@ export default function Index() {
       const json = await res.json()
       console.log("📦 Étudiants reçus :", json.data)
       setStudents(json.data || [])
+      console.log("📦 Exemple étudiant :", json.data[0])
     } catch (err) {
       alert('Erreur : ' + err)
     }
