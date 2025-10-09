@@ -438,6 +438,8 @@ async def reset_entry_exit(request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur SQL : {e}")
     finally:
+        conn.close()
+
         
 
 
