@@ -187,110 +187,111 @@ export default function Index() {
   })
 
   return (
-    <div className="index-page">
-      <>
+    <>
       <Sidebar />
       <div className="main-content">
-      <header>📷 Application de Présence QR</header>
+        <div className="index-page">
+          <header>📷 Application de Présence QR</header>
+  
+          <div className="controls">
+            <button onClick={startScanner}>📷 Scanner QR</button>
+            <button onClick={loadStudents}>🔄 Rafraîchir</button>
+            <button onClick={resetPresence}>♻️ Réinitialiser</button>
+            <button onClick={resetEntryExit}>🧹 Réinit Entrée/Sortie</button>
+            <button onClick={logout}>🔓 Déconnexion</button>
+          </div>
+  
+          <div className="filters">
+            <input
+              type="text"
+              placeholder="🔍 Rechercher…"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
+            />
+            <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)}>
+              <option value="">Toutes les postes</option>
+              {[...new Set(students.map((s) => s.Emploi))].sort().map((cl) => (
+                <option key={cl} value={cl}>{cl}</option>
+              ))}
+            </select>
+            <select value={timezone} onChange={(e) => setTimezone(e.target.value)}>
+              {populateTimezoneSelector().map((tz) => (
+                <option key={tz.value} value={tz.value}>{tz.label}</option>
+              ))}
+            </select>
+          </div>
+  
+          <div id="qr-reader" style={{ display: 'none' }}>
+            <div className="qr-overlay"></div>
+          </div>
+  
+          <div className="clock">
+            <div className="pulse-time">{clock.time}</div>
+            <div className="date-style">{clock.date}</div>
+            <div className="tz-style">🕒 Fuseau horaire : {clock.label}</div>
+          </div>
+  
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>MATRICULE</th>
+                  <th>NOM</th>
+                  <th>PRENOM(S)</th>
+                  <th>EMPLOI</th>
+                  <th>Présence</th>
+                  <th>Entrée</th>
+                  <th>Sortie</th>
+                  <th>HS (h:m)</th>
+                  <th>Montant HS</th>
+                  <th>Total HS</th>
+                  <th>Total Montant</th>
+                  <th>Logs</th>
+                  <th>Fuseau</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredStudents.length === 0 ? (
+                  <tr><td colSpan="13">Aucun employé trouvé</td></tr>
+                ) : (
+                  filteredStudents.map((stu) => {
+                    const today = new Date().toISOString().slice(0, 10)
+                    const entryDate = stu.entry_time?.slice(0, 10)
+                    const presence = entryDate === today ? 'Présent' : 'Absent'
+                    const dailyHS = stu.entry_time && stu.exit_time ? stu.daily_overtime || 'Sans Heure Sup' : 'Sans Heure Sup'
+                    const dailyAmount = stu.entry_time && stu.exit_time ? stu.daily_amount || 'Sans Heure Sup' : 'Sans Heure Sup'
+                    const totalHS = stu.overtime || '0H00'
+                    const montantAffiche = stu.overtime_amount > 0 ? `${stu.overtime_amount.toLocaleString('fr-FR')} Ar` : '0 Ar'
+  
+                    return (
+                      <tr key={stu.Matricule}>
+                        <td>{stu.Matricule}</td>
+                        <td>{stu.Nom}</td>
+                        <td>{stu.Prenom}</td>
+                        <td>{stu.Emploi}</td>
+                        <td>{presence}</td>
+                        <td>{formatToLocalTime(stu.entry_time)}</td>
+                        <td>{formatToLocalTime(stu.exit_time)}</td>
+                        <td>{dailyHS}</td>
+                        <td>{dailyAmount}</td>
+                        <td>{totalHS}</td>
+                        <td>{montantAffiche}</td>
+                        <td>
+                          <button className="action-btn" onClick={() => navigate(`/logs?id=${stu.Matricule}`)}>
+                            📄 Voir logs
+                          </button>
+                        </td>
+                        <td>🕒 {clock.label}</td>
+                      </tr>
+                    )
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-      </>
-
-      <div className="controls">
-        <button onClick={startScanner}>📷 Scanner QR</button>
-        <button onClick={loadStudents}>🔄 Rafraîchir</button>
-        <button onClick={resetPresence}>♻️ Réinitialiser</button>
-        <button onClick={resetEntryExit}>🧹 Réinit Entrée/Sortie</button>
-        <button onClick={logout}>🔓 Déconnexion</button>
-      </div>
-
-      <div className="filters">
-        <input
-          type="text"
-          placeholder="🔍 Rechercher…"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value.toLowerCase())}
-        />
-        <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)}>
-          <option value="">Toutes les postes</option>
-          {[...new Set(students.map((s) => s.Emploi))].sort().map((cl) => (
-            <option key={cl} value={cl}>{cl}</option>
-          ))}
-        </select>
-        <select value={timezone} onChange={(e) => setTimezone(e.target.value)}>
-          {populateTimezoneSelector().map((tz) => (
-            <option key={tz.value} value={tz.value}>{tz.label}</option>
-          ))}
-        </select>
-      </div>
-
-      <div id="qr-reader" style={{ display: 'none' }}>
-        <div className="qr-overlay"></div>
-      </div>
-
-      <div className="clock">
-        <div className="pulse-time">{clock.time}</div>
-        <div className="date-style">{clock.date}</div>
-        <div className="tz-style">🕒 Fuseau horaire : {clock.label}</div>
-      </div>
-
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>MATRICULE</th>
-              <th>NOM</th>
-              <th>PRENOM(S)</th>
-              <th>EMPLOI</th>
-              <th>Présence</th>
-              <th>Entrée</th>
-              <th>Sortie</th>
-              <th>HS (h:m)</th>
-              <th>Montant HS</th>
-              <th>Total HS</th>
-              <th>Total Montant</th>
-              <th>Logs</th>
-              <th>Fuseau</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredStudents.length === 0 ? (
-              <tr><td colSpan="13">Aucun employé trouvé</td></tr>
-            ) : (
-              filteredStudents.map((stu) => {
-                const today = new Date().toISOString().slice(0, 10)
-                const entryDate = stu.entry_time?.slice(0, 10)
-                const presence = entryDate === today ? 'Présent' : 'Absent'
-                const dailyHS = stu.entry_time && stu.exit_time ? stu.daily_overtime || 'Sans Heure Sup' : 'Sans Heure Sup'
-                const dailyAmount = stu.entry_time && stu.exit_time ? stu.daily_amount || 'Sans Heure Sup' : 'Sans Heure Sup'
-                const totalHS = stu.overtime || '0H00'
-                const montantAffiche = stu.overtime_amount > 0 ? `${stu.overtime_amount.toLocaleString('fr-FR')} Ar` : '0 Ar'
-
-                return (
-                  <tr key={stu.Matricule}>
-                    <td>{stu.Matricule}</td>
-                    <td>{stu.Nom}</td>
-                    <td>{stu.Prenom}</td>
-                    <td>{stu.Emploi}</td>
-                    <td>{presence}</td>
-                    <td>{formatToLocalTime(stu.entry_time)}</td>
-                    <td>{formatToLocalTime(stu.exit_time)}</td>
-                    <td>{dailyHS}</td>
-                    <td>{dailyAmount}</td>
-                    <td>{totalHS}</td>
-                    <td>{montantAffiche}</td>
-                    <td>
-                      <button className="action-btn" onClick={() => navigate(`/logs?id=${stu.Matricule}`)}>
-                        📄 Voir logs
-                      </button>
-                    </td>
-                    <td>🕒 {clock.label}</td>
-                  </tr>
-                )
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    </>
   )
+
 }
