@@ -30,20 +30,28 @@
 .sidebar nav ul li a {
   color: #ecf0f1;
   text-decoration: none;
-  display: block;
-  font-weight: bold;
+  display: flex;
+  align-items: center;
 }
 
 .sidebar nav ul li.active {
   background-color: #34495e;
 }
 
-@media screen and (max-width: 768px) {
-  .sidebar {
-    width: 0;
-  }
+.icon {
+  font-size: 1.2rem;
+  margin-right: 0;
+  width: 100%;
+  text-align: center;
+}
 
-  .sidebar:hover {
-    width: 160px;
-  }
+.label {
+  opacity: 0;
+  margin-left: 10px;
+  transition: opacity 0.3s ease;
+  white-space: nowrap;
+}
+
+.sidebar:hover .label {
+  opacity: 1;
 }
