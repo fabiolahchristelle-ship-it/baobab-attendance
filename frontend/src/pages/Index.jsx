@@ -102,11 +102,7 @@ export default function Index() {
   const resetEntryExit = async () => {
     try {
       const res = await fetch(`${API_BASE}/api/reset_entry_exit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          password: sessionStorage.getItem('admin_password')
-        })
+        method: 'POST'
       })
       const json = await res.json()
       if (json.status === 'ok') {
@@ -118,6 +114,7 @@ export default function Index() {
       alert('❌ Erreur : ' + err.message)
     }
   }
+
 
 
   const logout = () => {
