@@ -1,7 +1,6 @@
 {
   "name": "baobab-attendance",
   "version": "1.0.0",
-  "homepage": "/",
   "description": "Application de gestion de présence QR pour Baobab",
   "scripts": {
     "start": "react-scripts start",
