@@ -9,13 +9,13 @@ export default function Sidebar() {
       <nav>
         <ul>
           <li className={location.pathname === '/Index' ? 'active' : ''}>
-            <Link to="/">
+            <Link to="/Index">
               <span className="icon">🏠</span>
               <span className="label">Home</span>
             </Link>
           </li>
           <li className={location.pathname === '/ListEtudiants' ? 'active' : ''}>
-            <Link to="/list">
+            <Link to="/ListEtudiants">
               <span className="icon">📋</span>
               <span className="label">Liste des Employés</span>
             </Link>
