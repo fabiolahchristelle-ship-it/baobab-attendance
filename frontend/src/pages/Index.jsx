@@ -209,7 +209,7 @@ export default function Index() {
         </select>
       </div>
 
-      <div id="qr-reader" style={{ position: 'relative' }}>
+      <div id="qr-reader" style={{ display: 'none' }}>
         <div className="qr-overlay"></div>
       </div>
 
