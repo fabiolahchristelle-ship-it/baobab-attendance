@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Html5Qrcode } from 'html5-qrcode'
-import CryptoJS from 'crypto-js'
+import SHA256 from 'crypto-js/sha256'
 import './Index.css'
 
 const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000'
@@ -149,7 +149,7 @@ export default function Index() {
     if (!rawMatricule) return alert('❌ Matricule vide ou non détecté')
 
     // 🔐 Crypter en SHA-256
-    const studentId = CryptoJS.SHA256(rawMatricule).toString()
+    const studentId = SHA256(rawMatricule).toString()
 
     try {
       const res = await fetch(`${API_BASE}/api/mark_presence/${studentId}`, {
