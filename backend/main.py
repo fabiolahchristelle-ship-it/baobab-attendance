@@ -8,6 +8,10 @@ from zoneinfo import ZoneInfo
 from datetime import datetime, timezone, timedelta
 import sqlite3
 import os
+import hashlib
+
+def hash_matricule(matricule: str) -> str:
+    return hashlib.sha256(str(matricule).encode()).hexdigest()
 
 # 🔐 Mot de passe admin via variable d’environnement
 admin_password = os.getenv("ADMIN_PASSWORD", "baobab123")
@@ -148,13 +152,26 @@ def mark_presence(student_id: str):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
+    # 🔍 Trouver l'employé dont le hash SHA256(matricule) correspond
+    cursor.execute("SELECT Matricule FROM gestion_employe")
+    all_matricules = cursor.fetchall()
+    matched_id = None
+    for (matricule,) in all_matricules:
+        if hash_matricule(matricule) == student_id:
+            matched_id = matricule
+            break
+
+    if not matched_id:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Matricule crypté non reconnu")
+
     now_dt = datetime.now()
     now_str = now_dt.strftime("%Y-%m-%d %H:%M:%S")
     today = now_dt.strftime("%Y-%m-%d")
 
     cursor.execute(
         "SELECT entry_time, overtime, overtime_amount FROM gestion_employe WHERE Matricule = ?",
-        (student_id,)
+        (matched_id,)
     )
     row = cursor.fetchone()
     if not row:
@@ -168,7 +185,7 @@ def mark_presence(student_id: str):
     if not entry_time_str or not entry_time_str.startswith(today):
         cursor.execute(
             "UPDATE gestion_employe SET entry_time = ? WHERE Matricule = ?",
-            (now_str, student_id)
+            (now_str, matched_id)
         )
         message = "Entrée enregistrée"
         exit_time = ""
@@ -177,7 +194,7 @@ def mark_presence(student_id: str):
     else:
         cursor.execute(
             "UPDATE gestion_employe SET exit_time = ? WHERE Matricule = ?",
-            (now_str, student_id)
+            (now_str, matched_id)
         )
 
         gmt_plus_3 = timezone(timedelta(hours=3))
@@ -204,14 +221,14 @@ def mark_presence(student_id: str):
                 UPDATE gestion_employe
                 SET overtime = ?, overtime_amount = ?
                 WHERE Matricule = ?
-            """, (new_ot_str, new_ot_amt, student_id))
+            """, (new_ot_str, new_ot_amt, matched_id))
 
             cursor.execute("""
                 INSERT INTO presence_journaliere
                 (Matricule, date, entry_time, exit_time, overtime, overtime_amount)
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (
-                student_id, today,
+                matched_id, today,
                 entry_time_str, now_str,
                 daily_ot_str, daily_ot_amount
             ))
@@ -223,8 +240,8 @@ def mark_presence(student_id: str):
             new_ot_amt = old_ot_amt
         exit_time = now_str
 
-    cursor.execute("UPDATE gestion_employe SET Presence = Presence + 1 WHERE Matricule = ?", (student_id,))
-    cursor.execute("INSERT INTO presence_log (Matricule, date_heure) VALUES (?, ?)", (student_id, now_str))
+    cursor.execute("UPDATE gestion_employe SET Presence = Presence + 1 WHERE Matricule = ?", (matched_id,))
+    cursor.execute("INSERT INTO presence_log (Matricule, date_heure) VALUES (?, ?)", (matched_id, now_str))
 
     conn.commit()
     conn.close()
@@ -237,6 +254,7 @@ def mark_presence(student_id: str):
         "overtime": new_ot_str,
         "overtime_amount": new_ot_amt
     }
+
 
 # 📄 API : logs d’un employé
 @app.get("/api/logs/{student_id}")
