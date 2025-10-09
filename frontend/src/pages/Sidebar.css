@@ -51,6 +51,8 @@
   margin-left: 10px;
   transition: opacity 0.3s ease;
   white-space: nowrap;
+  font-family: 'Exo 2', sans-serif;
+  text-align: left;
 }
 
 .sidebar:hover .label {
