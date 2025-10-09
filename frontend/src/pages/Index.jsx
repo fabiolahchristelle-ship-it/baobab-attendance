@@ -100,20 +100,25 @@ export default function Index() {
   }
 
   const resetEntryExit = async () => {
-    if (!confirm('Réinitialiser toutes les entrées et sorties ?')) return
     try {
-      const res = await fetch(`${API_BASE}/api/reset_entry_exit`, { method: 'POST' })
+      const res = await fetch(`${API_BASE}/api/reset_entry_exit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          password: sessionStorage.getItem('admin_password')
+        })
+      })
       const json = await res.json()
       if (json.status === 'ok') {
-        alert('✅ ' + json.message)
-        loadStudents()
+        alert('✅ Entrées/Sorties réinitialisées')
       } else {
-        alert('❌ ' + (json.message || 'Erreur inconnue'))
+        throw new Error(json.detail || 'Erreur inconnue')
       }
     } catch (err) {
-      alert('Erreur réseau : ' + err.message)
+      alert('❌ Erreur : ' + err.message)
     }
   }
+
 
   const logout = () => {
     sessionStorage.removeItem('admin_password')
