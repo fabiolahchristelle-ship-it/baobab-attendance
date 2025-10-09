@@ -210,7 +210,7 @@ export default function Index() {
       </div>
 
       <div id="qr-reader" style={{ display: 'none' }}>
-        <div className="qr-overlay"></div>
+        
       </div>
 
       <div className="clock">
