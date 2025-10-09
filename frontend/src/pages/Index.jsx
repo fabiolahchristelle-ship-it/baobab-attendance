@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Html5Qrcode } from 'html5-qrcode'
 import SHA256 from 'crypto-js/sha256'
 import './Index.css'
+import Sidebar from './Sidebar'
 
 const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000'
 
@@ -187,7 +188,12 @@ export default function Index() {
 
   return (
     <div className="index-page">
+      <>
+      <Sidebar />
+      <div className="main-content">
       <header>📷 Application de Présence QR</header>
+      </div>
+      </>
 
       <div className="controls">
         <button onClick={startScanner}>📷 Scanner QR</button>
