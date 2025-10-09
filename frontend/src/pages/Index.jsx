@@ -1,7 +1,7 @@
-// frontend/src/pages/Index.jsx
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Html5Qrcode } from 'html5-qrcode'
+import SHA256 from 'crypto-js/sha256'
 import './Index.css'
 
 const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000'
@@ -64,6 +64,7 @@ export default function Index() {
       return utcString
     }
   }
+
   const loadStudents = async () => {
     try {
       const res = await fetch(`${API_BASE}/api/students`)
@@ -144,8 +145,12 @@ export default function Index() {
     const parts = decodedText.split(';')
     const p = parts.find((p) => p.trim().toLowerCase().startsWith('matricule:'))
     if (!p) return alert('❌ QR invalide : Matricule non trouvé')
-    const studentId = p.split(':')[1]?.trim()
-    if (!studentId) return alert('❌ Matricule vide ou non détecté')
+    const rawMatricule = p.split(':')[1]?.trim()
+    if (!rawMatricule) return alert('❌ Matricule vide ou non détecté')
+
+    // 🔐 Crypter en SHA-256
+    const studentId = SHA256(rawMatricule).toString()
+
     try {
       const res = await fetch(`${API_BASE}/api/mark_presence/${studentId}`, {
         method: 'POST',
