@@ -124,7 +124,7 @@ export default function Index() {
     const qr = new Html5Qrcode('qr-reader')
     await qr.start(
       { facingMode: 'environment' },
-      { fps: 10, qrbox: 250 },
+      { fps: 10, qrbox: 350 },
       (decodedText) => {
         if (decodedText === lastScan) return
         setLastScan(decodedText)
