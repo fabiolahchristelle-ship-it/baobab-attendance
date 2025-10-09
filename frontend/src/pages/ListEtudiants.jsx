@@ -45,7 +45,7 @@ export default function ListEtudiants() {
 
   const loadStudents = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/students/full`)
+      const res = await fetch(`${API_BASE}/api/students`)
       const json = await res.json()
       setStudents(json.data || [])
     } catch (err) {
