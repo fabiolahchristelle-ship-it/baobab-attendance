@@ -6,7 +6,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "postinstall": "chmod +x node_modules/.bin/react-scripts"
+    "postinstall": "chmod +x node_modules/.bin/react-scripts",
+    "postbuild": "cp public/_redirects build/_redirects"
   },
   "dependencies": {
     "html2canvas": "^1.4.1",
