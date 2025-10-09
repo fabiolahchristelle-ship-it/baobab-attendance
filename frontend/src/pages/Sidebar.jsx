@@ -14,8 +14,8 @@ export default function Sidebar() {
               <span className="label">Home</span>
             </Link>
           </li>
-          <li className={location.pathname === '/ListEtudiants' ? 'active' : ''}>
-            <Link to="/ListEtudiants">
+          <li className={location.pathname === '/etudiants' ? 'active' : ''}>
+            <Link to="/etudiants">
               <span className="icon">📋</span>
               <span className="label">Liste des Employés</span>
             </Link>
