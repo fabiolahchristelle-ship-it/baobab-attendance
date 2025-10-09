@@ -147,10 +147,9 @@ export default function Index() {
     if (!p) return alert('❌ QR invalide : Matricule non trouvé')
     const rawMatricule = p.split(':')[1]?.trim()
     if (!rawMatricule) return alert('❌ Matricule vide ou non détecté')
-
-    // 🔐 Crypter en SHA-256
+  
     const studentId = SHA256(rawMatricule).toString()
-
+  
     try {
       const res = await fetch(`${API_BASE}/api/mark_presence/${studentId}`, {
         method: 'POST',
@@ -158,9 +157,14 @@ export default function Index() {
         body: JSON.stringify({ timezone })
       })
       const json = await res.json()
+  
       if (json.status === 'ok') {
         alert(`✅ Entrée : ${formatToLocalTime(json.entry_time)}\nSortie : ${formatToLocalTime(json.exit_time)}`)
-        loadStudents()
+  
+        // ⏱️ Attendre 500ms avant de recharger les données
+        setTimeout(() => {
+          loadStudents()
+        }, 500)
       } else {
         alert('❌ Erreur API : ' + (json.message || 'Réponse inconnue'))
       }
@@ -168,6 +172,8 @@ export default function Index() {
       alert('❌ Erreur réseau : ' + err.message)
     }
   }
+
+  
   const filteredStudents = students.filter((s) => {
     const matchText =
       s.Matricule.toString().includes(searchTerm) ||
