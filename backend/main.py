@@ -307,8 +307,7 @@ def get_all_students():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT Matricule, Nom, Prenom, Emploi, Affectation, Numero, Mail, Presence,
-       entry_time, exit_time, overtime, overtime_amount
+        SELECT Matricule, Nom, Prenom, Emploi, Affectation, Numero, Mail, Presence
         FROM gestion_employe
         ORDER BY Nom ASC
     """)
@@ -323,11 +322,7 @@ def get_all_students():
             "Affectation": r[4],
             "Numero": r[5],
             "Mail": r[6],
-            "Presence": r[7],
-            "entry_time": r[8],
-            "exit_time": r[9],
-            "overtime": r[10],
-            "overtime_amount": r[11]
+            "Presence": r[7]
         } for r in rows
     ]}
 
