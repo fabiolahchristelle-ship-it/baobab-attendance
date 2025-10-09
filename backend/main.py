@@ -419,3 +419,25 @@ def delete_student(matricule: int):
         conn.close()
 
 
+@app.post("/api/reset_entry_exit")
+async def reset_entry_exit(request: Request):
+    data = await request.json()
+    if data.get("password") != admin_password:
+        raise HTTPException(status_code=401, detail="Mot de passe admin incorrect")
+
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE gestion_employe
+            SET entry_time = NULL,
+                exit_time = NULL
+        """)
+        conn.commit()
+        return {"status": "ok", "message": "Entrées et sorties réinitialisées"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur SQL : {e}")
+    finally:
+        
+
+
