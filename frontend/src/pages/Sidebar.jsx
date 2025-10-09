@@ -8,13 +8,13 @@ export default function Sidebar() {
     <aside className="sidebar">
       <nav>
         <ul>
-          <li className={location.pathname === '/' ? 'active' : ''}>
+          <li className={location.pathname === '/Index' ? 'active' : ''}>
             <Link to="/">
               <span className="icon">🏠</span>
               <span className="label">Home</span>
             </Link>
           </li>
-          <li className={location.pathname === '/list' ? 'active' : ''}>
+          <li className={location.pathname === '/ListEtudiants' ? 'active' : ''}>
             <Link to="/list">
               <span className="icon">📋</span>
               <span className="label">Liste des Employés</span>
