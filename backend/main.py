@@ -303,18 +303,21 @@ async def wipe_all(request: Request):
         conn.close()
 
 @app.get("/api/students")
-def get_all_students():
+def get_students():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
+
     cursor.execute("""
-        SELECT Matricule, Nom, Prenom, Emploi, Affectation, Numero, Mail, Presence
+        SELECT Matricule, Nom, Prenom, Emploi, Affectation, Numero, Mail, Presence,
+               entry_time, exit_time, overtime, overtime_amount
         FROM gestion_employe
         ORDER BY Nom ASC
     """)
     rows = cursor.fetchall()
-    conn.close()
-    return {"data": [
-        {
+
+    students = []
+    for r in rows:
+        students.append({
             "Matricule": r[0],
             "Nom": r[1],
             "Prenom": r[2],
@@ -322,9 +325,17 @@ def get_all_students():
             "Affectation": r[4],
             "Numero": r[5],
             "Mail": r[6],
-            "Presence": r[7]
-        } for r in rows
-    ]}
+            "Presence": r[7],
+            "entry_time": r[8],
+            "exit_time": r[9],
+            "daily_overtime": "",  # Optionnel : à calculer depuis presence_journaliere
+            "daily_amount": "",    # Optionnel : à calculer depuis presence_journaliere
+            "overtime": r[10],
+            "overtime_amount": r[11]
+        })
+
+    conn.close()
+    return {"status": "ok", "data": students}
 
 #listes des routes
 @app.get("/api/routes")
