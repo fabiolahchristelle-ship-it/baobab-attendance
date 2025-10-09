@@ -69,6 +69,7 @@ export default function Index() {
     try {
       const res = await fetch(`${API_BASE}/api/students`)
       const json = await res.json()
+      console.log("📦 Données reçues :", json)
       setStudents(json.data || [])
     } catch (err) {
       alert('Erreur : ' + err)
