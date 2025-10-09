@@ -1,4 +1,4 @@
-import { BrowserRouter as Router } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Index from './pages/Index';
 import ListEtudiants from './pages/ListEtudiants';
@@ -8,7 +8,7 @@ export default function App() {
   console.log("App loaded");
 
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
@@ -16,6 +16,6 @@ export default function App() {
         <Route path="/etudiants" element={<ListEtudiants />} />
         <Route path="/logs" element={<Logs />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
